@@ -1,21 +1,14 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-const int N = 3;
+const int N = 4;
 
-vector<int> mx[1 << N];
 
 char pr[256];
 
-int x[N];
+vector<bool> x;
 
-
-void dec(int i){
-    for(int j = 0; j < N; ++j){
-        x[j] = (i >> j) & 1;
-    }
-
-}
+string s;
 
 
 void set_pr(){
@@ -102,64 +95,91 @@ int solve(const string &s, int &l, vector<char> &ops, vector<char> &vals){
     return solve(s, ++l, ops, vals);
 }
 
+vector<int> find_adj(){
+
+    vector<int> adj;
+    for(int i = 0; i < N; ++i){
+        x[i] = !x[i];
+
+        vector <char> s1, s2;
+
+        int l = 0;
+                
+        if(solve(s, l, s1, s2)){
+            adj.push_back(i);
+        }
+        x[i] = !x[i];
+    }
+    return adj;
+}
+
+void print(int ind){
+    cout << " | (";
+    for(int i = 0; i < N; ++i){
+        if(i == ind){
+            continue;
+        }
+        (x[i]) ? cout << 'x' : cout << 'X';
+        cout << i + 1;
+    }
+
+    cout << ')';
+
+}
+
+void rec(int i){
+    if(i == N){
+        vector<char> s1, s2;
+        int l = 0;
+        if(!solve(s, l, s1, s2)){
+            return;
+        }
+
+        /*for(int i = 0; i < N; ++i){
+            cout << x[i];
+        }
+        cout << endl;*/
+
+        auto adj = find_adj();
+
+        if(adj.size() == 0){
+            print(-1);
+        }
+        if(adj.size() == 1){
+            /*for(int i = 0; i < N; ++i){
+                if(!x[i]){
+                    x[i] = 1;
+                    auto new_adj = find_adj();
+                    x[i] = 0;
+                    if(new_adj.size() == 1){
+                        return;
+                    }
+                }
+            }*/
+            print(adj[0]);
+        }
+        
+        return;
+    }
+    rec(i + 1);
+    x[i] = 1;
+    rec(i + 1);
+    x[i] = 0;
+}
 
 int main(){
 
     set_pr();
 
-    string s;
     cin >> s;
 
+    x.resize(N);
 
-    for(int i = 0; i < (1 << N); ++i){
-        dec(i);
-        int _l = 0;
-        vector<char> s1, s2;
-        if(!solve(s, _l, s1, s2)) {
-            continue;
-        }
-        for(int k = 0; k < N; ++k){
-            cout << x[k] << ' ';
-        }
-        cout << endl;
-        for(int j = 0; j < N; ++j){
-            int d = (i >> j) & 1;
-            if(!d){
-                dec(i | (1 << j));
-                _l = 0;
-                s1.clear();
-                s2.clear();
-                if(solve(s, _l, s1, s2)){
-                    mx[i].push_back(j);
-                    mx[i | (1 << j)].push_back(j);
-                }
-            }
-        }
-    }
+    cout << "0";
 
 
-    cout << "1";
+    rec(0);
 
 
-    for(int i = 0; i < (1 << N); ++i){
-        if(mx[i].size() == 1){
-            cout << " | (";
-            for(int j = 0; j < N; ++j){
-
-                if(j != 0){
-                    cout << " & ";
-                }
-                if(j == mx[i][0]){
-                    cout << '1';
-                    continue;
-                }
-                int d = (i >> j) & 1;
-                if(!d){
-                    cout << "!";
-                }
-                cout << "x" << j + 1;
-            }
-            cout << ")";
-        }
-    }
+    cout << endl << (long double) clock() / CLOCKS_PER_SEC << endl;
 }
